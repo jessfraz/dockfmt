@@ -5,6 +5,9 @@ CI](https://travis-ci.org/jfrazelle/dockfmt.svg?branch=master)](https://travis-c
 
 Dockerfile format.
 
+This is a work in progress so calm yourself if you want to file 80 bajillion
+issues.
+
 ## Usage
 
 **Help output**
