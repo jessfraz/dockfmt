@@ -99,11 +99,15 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 
 	// format per directive
 	switch k {
+	case "ADD":
+		v = fmtCopy(ast.Next)
 	case "CMD":
 		v, err = fmtCmd(ast.Next)
 		if err != nil {
 			return "", err
 		}
+	case "COPY":
+		v = fmtCopy(ast.Next)
 	case "ENTRYPOINT":
 		v, err = fmtCmd(ast.Next)
 		if err != nil {
@@ -138,6 +142,7 @@ func (df *file) getOriginalLines(s int, e int, fn string) (string, error) {
 
 	return l, nil
 }
+
 func getCmd(n *parser.Node, cmd []string) []string {
 	cmd = append(cmd, n.Value)
 	if len(n.Flags) > 0 {
@@ -162,6 +167,12 @@ func fmtCmd(node *parser.Node) (string, error) {
 		return "", err
 	}
 	return string(b), nil
+}
+
+func fmtCopy(node *parser.Node) string {
+	cmd := []string{}
+	cmd = getCmd(node, cmd)
+	return strings.Join(cmd, "\t")
 }
 
 func fmtRun(s string) string {
