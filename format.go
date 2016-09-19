@@ -115,6 +115,8 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 		}
 	case "RUN":
 		v = fmtRun(v)
+	default:
+		v = fmtCopy(ast.Next)
 	}
 
 	// print to the result
@@ -144,6 +146,9 @@ func (df *file) getOriginalLines(s int, e int, fn string) (string, error) {
 }
 
 func getCmd(n *parser.Node, cmd []string) []string {
+	if n == nil {
+		return cmd
+	}
 	cmd = append(cmd, n.Value)
 	if len(n.Flags) > 0 {
 		cmd = append(cmd, n.Flags...)
