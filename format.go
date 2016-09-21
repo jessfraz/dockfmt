@@ -222,6 +222,10 @@ func fmtRun(s string) string {
 		}
 		r += c
 	}
+
+	// put `apt-get update && apt-get install` on one-line it's prettier
+	r = strings.Replace(r, "apt-get update \\\n\t&& apt-get install", "apt-get update && apt-get install", -1)
+
 	return r
 }
 
