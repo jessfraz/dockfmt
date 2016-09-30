@@ -34,7 +34,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "dockfmt"
 	app.Version = VERSION
-	app.Author = "@jfrazelle"
+	app.Author = "@jessfraz"
 	app.Email = "no-reply@butts.com"
 	app.Usage = "Dockerfile format."
 	app.Before = preload

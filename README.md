@@ -1,7 +1,7 @@
 # dockfmt
 
 [![Travis
-CI](https://travis-ci.org/jfrazelle/dockfmt.svg?branch=master)](https://travis-ci.org/jfrazelle/dockfmt)
+CI](https://travis-ci.org/jessfraz/dockfmt.svg?branch=master)](https://travis-ci.org/jessfraz/dockfmt)
 
 Dockerfile format.
 
@@ -24,7 +24,7 @@ VERSION:
    v0.2.0
 
 AUTHOR(S):
-   @jfrazelle <no-reply@butts.com>
+   @jessfraz <no-reply@butts.com>
 
 COMMANDS:
      base         list the base image used in Dockerfile(s)
