@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 // Context is a type that is passed through to
@@ -15,6 +16,7 @@ import (
 type Context struct {
 	App           *App
 	Command       Command
+	shellComplete bool
 	flagSet       *flag.FlagSet
 	setFlags      map[string]bool
 	parentContext *Context
@@ -22,7 +24,13 @@ type Context struct {
 
 // NewContext creates a new context. For use in when invoking an App or Command action.
 func NewContext(app *App, set *flag.FlagSet, parentCtx *Context) *Context {
-	return &Context{App: app, flagSet: set, parentContext: parentCtx}
+	c := &Context{App: app, flagSet: set, parentContext: parentCtx}
+
+	if parentCtx != nil {
+		c.shellComplete = parentCtx.shellComplete
+	}
+
+	return c
 }
 
 // NumFlags returns the number of flags set
@@ -32,11 +40,13 @@ func (c *Context) NumFlags() int {
 
 // Set sets a context flag to a value.
 func (c *Context) Set(name, value string) error {
+	c.setFlags = nil
 	return c.flagSet.Set(name, value)
 }
 
 // GlobalSet sets a context flag to a value on the global flagset
 func (c *Context) GlobalSet(name, value string) error {
+	globalContext(c).setFlags = nil
 	return globalContext(c).flagSet.Set(name, value)
 }
 
@@ -64,7 +74,7 @@ func (c *Context) IsSet(name string) bool {
 		// change in version 2 to add `IsSet` to the Flag interface to push the
 		// responsibility closer to where the information required to determine
 		// whether a flag is set by non-standard means such as environment
-		// variables is avaliable.
+		// variables is available.
 		//
 		// See https://github.com/urfave/cli/issues/294 for additional discussion
 		flags := c.Command.Flags
@@ -84,18 +94,26 @@ func (c *Context) IsSet(name string) bool {
 					val = val.Elem()
 				}
 
-				envVarValue := val.FieldByName("EnvVar")
-				if !envVarValue.IsValid() {
-					return
+				filePathValue := val.FieldByName("FilePath")
+				if filePathValue.IsValid() {
+					eachName(filePathValue.String(), func(filePath string) {
+						if _, err := os.Stat(filePath); err == nil {
+							c.setFlags[name] = true
+							return
+						}
+					})
 				}
 
-				eachName(envVarValue.String(), func(envVar string) {
-					envVar = strings.TrimSpace(envVar)
-					if envVal := os.Getenv(envVar); envVal != "" {
-						c.setFlags[name] = true
-						return
-					}
-				})
+				envVarValue := val.FieldByName("EnvVar")
+				if envVarValue.IsValid() {
+					eachName(envVarValue.String(), func(envVar string) {
+						envVar = strings.TrimSpace(envVar)
+						if _, ok := syscall.Getenv(envVar); ok {
+							c.setFlags[name] = true
+							return
+						}
+					})
+				}
 			})
 		}
 	}
@@ -145,6 +163,11 @@ func (c *Context) GlobalFlagNames() (names []string) {
 // Parent returns the parent context, if any
 func (c *Context) Parent() *Context {
 	return c.parentContext
+}
+
+// value returns the value of the flag coressponding to `name`
+func (c *Context) value(name string) interface{} {
+	return c.flagSet.Lookup(name).Value.(flag.Getter).Get()
 }
 
 // Args contains apps console arguments

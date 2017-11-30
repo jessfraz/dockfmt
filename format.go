@@ -122,9 +122,12 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 	// print to the result
 	result += fmt.Sprintf("%s\t%s\n", k, v)
 
-	// set our current line as the last line in this node +1
+	// set our current line as the start line in the next node
 	// since we want the next node
-	df.currentLine = ast.EndLine + 1
+	df.currentLine += 1
+	if ast.Next != nil {
+		df.currentLine = ast.Next.StartLine
+	}
 	return
 }
 

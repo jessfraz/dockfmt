@@ -57,8 +57,8 @@ func unmarshalMap(i interface{}) (ret map[interface{}]interface{}, err error) {
 			} else {
 				return nil, err
 			}
-		case reflect.Array:
-			fallthrough // [todo] - Support array type
+		case reflect.Array, reflect.Slice:
+			ret[key] = val.([]interface{})
 		default:
 			return nil, fmt.Errorf("Unsupported: type = %#v", v.Kind())
 		}
@@ -66,9 +66,9 @@ func unmarshalMap(i interface{}) (ret map[interface{}]interface{}, err error) {
 	return ret, nil
 }
 
-func (self *tomlMap) UnmarshalTOML(i interface{}) error {
+func (tm *tomlMap) UnmarshalTOML(i interface{}) error {
 	if tmp, err := unmarshalMap(i); err == nil {
-		self.Map = tmp
+		tm.Map = tmp
 	} else {
 		return err
 	}

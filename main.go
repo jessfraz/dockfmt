@@ -134,14 +134,11 @@ func forFile(c *cli.Context, fnc func(string, []*parser.Node) error) error {
 		}
 		defer f.Close()
 
-		d := parser.Directive{LookingForDirectives: true}
-		parser.SetEscapeToken(parser.DefaultEscapeToken, &d)
-
-		ast, err := parser.Parse(f, &d)
+		result, err := parser.Parse(f)
 		if err != nil {
 			return err
 		}
-
+		ast := result.AST
 		nodes := []*parser.Node{ast}
 		if ast.Children != nil {
 			nodes = append(nodes, ast.Children...)
