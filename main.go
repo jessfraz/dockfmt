@@ -8,12 +8,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/builder/dockerfile/parser"
+	"github.com/jessfraz/dockfmt/version"
 	"github.com/urfave/cli"
-)
-
-const (
-	// VERSION is the binary version.
-	VERSION = "v0.2.0"
 )
 
 // preload initializes any global options and configuration
@@ -33,7 +29,7 @@ func preload(c *cli.Context) (err error) {
 func main() {
 	app := cli.NewApp()
 	app.Name = "dockfmt"
-	app.Version = VERSION
+	app.Version = version.VERSION
 	app.Author = "@jessfraz"
 	app.Email = "no-reply@butts.com"
 	app.Usage = "Dockerfile format."

@@ -8,6 +8,22 @@ Dockerfile format.
 This is a work in progress so calm yourself if you want to file 80 bajillion
 issues.
 
+## Installation
+
+#### Binaries
+
+- **darwin** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-darwin-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-darwin-amd64)
+- **freebsd** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-freebsd-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-freebsd-amd64)
+- **linux** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-linux-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-linux-amd64) / [arm](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-linux-arm) / [arm64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-linux-arm64)
+- **solaris** [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-solaris-amd64)
+- **windows** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-windows-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.2.0/dockfmt-windows-amd64)
+
+#### Via Go
+
+```bash
+$ go get github.com/jessfraz/dockfmt
+```
+
 ## Usage
 
 **Help output**
