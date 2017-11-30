@@ -124,7 +124,7 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 
 	// set our current line as the start line in the next node
 	// since we want the next node
-	df.currentLine += 1
+	df.currentLine++
 	if ast.Next != nil {
 		df.currentLine = ast.Next.StartLine
 	}
