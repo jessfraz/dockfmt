@@ -70,7 +70,7 @@ staticcheck: ## Verifies `staticcheck` passes
 .PHONY: install
 install: ## Installs the executable or package
 	@echo "+ $@"
-	@go install .
+	go install -a -tags "$(BUILDTAGS)" ${GO_LDFLAGS} .
 
 define buildpretty
 mkdir -p $(BUILDDIR)/$(1)/$(2);
@@ -103,7 +103,7 @@ release: *.go VERSION ## Builds the cross-compiled binaries, naming them in such
 
 .PHONY: bump-version
 BUMP := patch
-bump-version: ## Bump the version in the version file. Set KIND to [ patch | major | minor ]
+bump-version: ## Bump the version in the version file. Set BUMP to [ patch | major | minor ]
 	@go get -u github.com/jessfraz/junk/sembump # update sembump tool
 	$(eval NEW_VERSION = $(shell sembump --kind $(BUMP) $(VERSION)))
 	@echo "Bumping VERSION from $(VERSION) to $(NEW_VERSION)"

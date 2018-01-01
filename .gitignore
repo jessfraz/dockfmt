@@ -43,5 +43,4 @@ Icon
 .Trashes
 
 dockfmt
-binaries
-cross
+cross/
