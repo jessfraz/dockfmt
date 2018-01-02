@@ -55,10 +55,6 @@ type Command struct {
 	HideHelp bool
 	// Boolean to hide this command from help or completion
 	Hidden bool
-	// Boolean to enable short-option handling so user can combine several
-	// single-character bool arguements into one
-	// i.e. foobar -o -v -> foobar -ov
-	UseShortOptionHandling bool
 
 	// Full name of command for help, defaults to full command name, including parent commands.
 	HelpName        string
@@ -77,7 +73,7 @@ func (c CommandsByName) Len() int {
 }
 
 func (c CommandsByName) Less(i, j int) bool {
-	return lexicographicLess(c[i].Name, c[j].Name)
+	return c[i].Name < c[j].Name
 }
 
 func (c CommandsByName) Swap(i, j int) {
@@ -145,22 +141,8 @@ func (c Command) Run(ctx *Context) (err error) {
 			} else {
 				flagArgs = args[firstFlagIndex:]
 			}
-			// separate combined flags
-			if c.UseShortOptionHandling {
-				var flagArgsSeparated []string
-				for _, flagArg := range flagArgs {
-					if strings.HasPrefix(flagArg, "-") && strings.HasPrefix(flagArg, "--") == false && len(flagArg) > 2 {
-						for _, flagChar := range flagArg[1:] {
-							flagArgsSeparated = append(flagArgsSeparated, "-"+string(flagChar))
-						}
-					} else {
-						flagArgsSeparated = append(flagArgsSeparated, flagArg)
-					}
-				}
-				err = set.Parse(append(flagArgsSeparated, regularArgs...))
-			} else {
-				err = set.Parse(append(flagArgs, regularArgs...))
-			}
+
+			err = set.Parse(append(flagArgs, regularArgs...))
 		} else {
 			err = set.Parse(ctx.Args().Tail())
 		}
@@ -185,7 +167,7 @@ func (c Command) Run(ctx *Context) (err error) {
 	if err != nil {
 		if c.OnUsageError != nil {
 			err := c.OnUsageError(context, err, false)
-			context.App.handleExitCoder(context, err)
+			HandleExitCoder(err)
 			return err
 		}
 		fmt.Fprintln(context.App.Writer, "Incorrect Usage:", err.Error())
@@ -202,7 +184,7 @@ func (c Command) Run(ctx *Context) (err error) {
 		defer func() {
 			afterErr := c.After(context)
 			if afterErr != nil {
-				context.App.handleExitCoder(context, err)
+				HandleExitCoder(err)
 				if err != nil {
 					err = NewMultiError(err, afterErr)
 				} else {
@@ -216,7 +198,7 @@ func (c Command) Run(ctx *Context) (err error) {
 		err = c.Before(context)
 		if err != nil {
 			ShowCommandHelp(context, c.Name)
-			context.App.handleExitCoder(context, err)
+			HandleExitCoder(err)
 			return err
 		}
 	}
@@ -228,7 +210,7 @@ func (c Command) Run(ctx *Context) (err error) {
 	err = HandleAction(c.Action, context)
 
 	if err != nil {
-		context.App.handleExitCoder(context, err)
+		HandleExitCoder(err)
 	}
 	return err
 }

@@ -6,9 +6,9 @@ import (
 	"os"
 	"sort"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/builder/dockerfile/parser"
 	"github.com/jessfraz/dockfmt/version"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
