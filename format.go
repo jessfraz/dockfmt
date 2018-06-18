@@ -5,9 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/builder/dockerfile/parser"
@@ -60,10 +63,20 @@ func format(c *cli.Context) error {
 
 		// write to the file
 		if c.Bool("write") {
-			if err := ioutil.WriteFile(f, []byte(result), 0644); err != nil {
+			// make a temporary backup before overwriting original
+			bakname, err := backupFile(f+".", og, 0644)
+			if err != nil {
 				return err
 			}
 
+			if err := ioutil.WriteFile(f, []byte(result), 0644); err != nil {
+				os.Rename(bakname, f)
+				return err
+			}
+
+			if err := os.Remove(bakname); err != nil {
+				return fmt.Errorf("could not remove backup file %s: %v", bakname, err)
+			}
 		}
 
 		if !c.Bool("diff") && !c.Bool("list") && !c.Bool("write") {
@@ -120,7 +133,7 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 	}
 
 	// print to the result
-	result += fmt.Sprintf("%s\t%s\n", k, v)
+	result = fmt.Sprintf("%s\t%s\n", k, v)
 
 	// set our current line as the start line in the next node
 	// since we want the next node
@@ -280,4 +293,39 @@ func diff(b1, b2 []byte) (data []byte, err error) {
 	}
 
 	return
+}
+
+const chmodSupported = runtime.GOOS != "windows"
+
+// backupFile writes data to a new file named filename<number> with permissions perm,
+// with <number randomly chosen such that the file name is unique. backupFile returns
+// the chosen file name.
+func backupFile(filename string, data []byte, perm os.FileMode) (string, error) {
+	// create backup file
+	f, err := ioutil.TempFile(filepath.Dir(filename), filepath.Base(filename))
+	if err != nil {
+		return "", err
+	}
+
+	bakname := f.Name()
+	if chmodSupported {
+		err = f.Chmod(perm)
+		if err != nil {
+			f.Close()
+			os.Remove(bakname)
+			return bakname, err
+		}
+	}
+
+	// write data to backup file
+	n, err := f.Write(data)
+	if err == nil && n < len(data) {
+		err = io.ErrShortWrite
+	}
+
+	if err1 := f.Close(); err == nil {
+		err = err1
+	}
+
+	return bakname, err
 }
