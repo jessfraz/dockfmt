@@ -6,8 +6,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/docker/docker/builder/dockerfile/parser"
 	"github.com/jessfraz/dockfmt/version"
+	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )

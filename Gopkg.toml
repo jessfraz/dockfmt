@@ -25,5 +25,5 @@
   source = "github.com/sirupsen/logrus"
 
 [[override]]
-  name = "github.com/docker/docker"
+  name = "github.com/moby/buildkit"
   branch = "master"
