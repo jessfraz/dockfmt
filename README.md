@@ -12,11 +12,11 @@ issues.
 
 #### Binaries
 
-- **darwin** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-darwin-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-darwin-amd64)
-- **freebsd** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-freebsd-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-freebsd-amd64)
-- **linux** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-linux-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-linux-amd64) / [arm](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-linux-arm) / [arm64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-linux-arm64)
-- **solaris** [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-solaris-amd64)
-- **windows** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-windows-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.0/dockfmt-windows-amd64)
+- **darwin** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-darwin-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-darwin-amd64)
+- **freebsd** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-freebsd-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-freebsd-amd64)
+- **linux** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-amd64) / [arm](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-arm) / [arm64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-arm64)
+- **solaris** [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-solaris-amd64)
+- **windows** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-windows-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-windows-amd64)
 
 #### Via Go
 
@@ -37,7 +37,7 @@ USAGE:
    dockfmt [global options] command [command options] [arguments...]
 
 VERSION:
-   v0.3.0
+   v0.3.1
 
 AUTHOR(S):
    @jessfraz <no-reply@butts.com>
