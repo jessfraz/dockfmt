@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ff33b1a9016f79e88285f9327277c4c4ef60b82da139960cf17a3fbb1f1453af"
+  digest = "1:eab24c0bff71901691268c501111fa83db5d0b0c432b5b5882405a98106ed4d4"
   name = "github.com/genuinetools/pkg"
   packages = ["cli"]
   pruneopts = "NUT"
-  revision = "764bcdebd5f70d4a3d0f557ee89f764ba6182d0b"
+  revision = "e057fa50f23480b1a16b04c37e72d34f6360e600"
 
 [[projects]]
   branch = "master"
@@ -18,7 +18,7 @@
     "frontend/dockerfile/parser",
   ]
   pruneopts = "NUT"
-  revision = "56e2ea083a4a392da9fb3a25a9e7cae34430948e"
+  revision = "628681f8e4aa33e987e4c9519fbacb292dd188a3"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"

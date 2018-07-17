@@ -84,46 +84,56 @@ func (p *Program) Run() {
 	ctx := p.defaultContext()
 
 	// Pass the os.Args through so we can more easily unit test.
-	printUsage, err := p.run(ctx, os.Args)
-	if err == nil && !printUsage {
+	err := p.run(ctx, os.Args)
+	if err == nil {
+		// Return early if there was no error.
 		return
 	}
 
-	if err != nil {
+	if err != flag.ErrHelp {
+		// We did not return the error to print the usage, so let's print the
+		// error and exit.
 		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
-	if printUsage {
-		if err != nil {
-			// Print an extra new line to seperate from the usage output.
-			fmt.Fprintln(os.Stderr)
-		}
-		p.usage(ctx)
-	}
+
+	// Print the usage.
+	p.FlagSet.Usage()
 	os.Exit(1)
 }
 
-func (p *Program) run(ctx context.Context, args []string) (bool, error) {
+func (p *Program) run(ctx context.Context, args []string) error {
 	// Append the version command to the list of commands by default.
 	p.Commands = append(p.Commands, &versionCommand{})
+
+	// Set the default flagset if our flagset is undefined.
+	if p.FlagSet == nil {
+		p.FlagSet = defaultFlagSet(p.Name)
+	}
+
+	// Override the usage text to something nicer.
+	p.FlagSet.Usage = func() {
+		p.usage(ctx)
+	}
 
 	// IF
 	// args is <nil>
 	// OR
-	// args is less than zero
+	// args is less than 1
 	// OR
 	// we have more than one arg and it equals help OR is a help flag
 	// THEN
-	// printUsage
+	// print the usage
 	if args == nil ||
 		len(args) < 1 ||
 		(len(args) > 1 && contains([]string{"-h", "--help", "help"}, args[1])) {
-		return true, nil
+		return flag.ErrHelp
 	}
 
 	// If we do not have an action set and we have no commands, print the usage
 	// and exit.
 	if p.Action == nil && len(p.Commands) < 2 {
-		return true, nil
+		return flag.ErrHelp
 	}
 
 	// Check if the command exists.
@@ -143,20 +153,15 @@ func (p *Program) run(ctx context.Context, args []string) (bool, error) {
 	// Return early if we didn't enter the single action logic and
 	// the command does not exist or we were passed no commands.
 	if len(args) < 2 {
-		return true, nil
+		return flag.ErrHelp
 	}
 	if !commandExists {
-		return true, fmt.Errorf("%s: no such command", args[1])
+		return fmt.Errorf("%s: no such command", args[1])
 	}
 
 	// Iterate over the commands in the program.
 	for _, command := range p.Commands {
 		if args[1] == command.Name() {
-			// Set the default flagset if our flagset is undefined.
-			if p.FlagSet == nil {
-				p.FlagSet = defaultFlagSet(p.Name)
-			}
-
 			// Register the subcommand flags in with the common/global flags.
 			command.Register(p.FlagSet)
 
@@ -165,12 +170,21 @@ func (p *Program) run(ctx context.Context, args []string) (bool, error) {
 
 			// Parse the flags the user gave us.
 			if err := p.FlagSet.Parse(args[2:]); err != nil {
-				return false, err
+				return err
 			}
 
-			if p.Before != nil {
+			// Check that they didn't add a -h or --help flag after the subcommand's
+			// commands, like `cmd sub other thing -h`.
+			if contains([]string{"-h", "--help"}, args...) {
+				// Print the flag usage and exit.
+				return flag.ErrHelp
+			}
+
+			// Only execute the Before function for user-supplied commands.
+			// This excludes the version command we supply.
+			if p.Before != nil && command.Name() != "version" {
 				if err := p.Before(ctx); err != nil {
-					return false, err
+					return err
 				}
 			}
 
@@ -180,43 +194,33 @@ func (p *Program) run(ctx context.Context, args []string) (bool, error) {
 					p.After(ctx)
 				}
 
-				return false, err
+				return err
 			}
 
 			// Run the after function.
 			if p.After != nil {
 				if err := p.After(ctx); err != nil {
-					return false, err
+					return err
 				}
 			}
 		}
 	}
 
 	// Done.
-	return false, nil
+	return nil
 }
 
-func (p *Program) runAction(ctx context.Context, args []string) (bool, error) {
-	// Set the default flagset if our flagset is undefined.
-	if p.FlagSet == nil {
-		p.FlagSet = defaultFlagSet(p.Name)
-	}
-
-	// Override the usage text to something nicer.
-	p.FlagSet.Usage = func() {
-		p.usage(ctx)
-	}
-
+func (p *Program) runAction(ctx context.Context, args []string) error {
 	// Parse the flags the user gave us.
 	if err := p.FlagSet.Parse(args[1:]); err != nil {
-		return true, nil
+		return flag.ErrHelp
 	}
 
 	// Run the main action _if_ we are not in the loop for the version command
 	// that is added by default.
 	if p.Before != nil {
 		if err := p.Before(ctx); err != nil {
-			return false, err
+			return err
 		}
 	}
 
@@ -227,18 +231,18 @@ func (p *Program) runAction(ctx context.Context, args []string) (bool, error) {
 			p.After(ctx)
 		}
 
-		return false, err
+		return err
 	}
 
 	// Run the after function.
 	if p.After != nil {
 		if err := p.After(ctx); err != nil {
-			return false, err
+			return err
 		}
 	}
 
 	// Done.
-	return false, nil
+	return nil
 }
 
 func (p *Program) usage(ctx context.Context) error {
@@ -371,11 +375,14 @@ func in(a string, c []Command) bool {
 	return false
 }
 
-func contains(match []string, s string) bool {
-	// Iterate over the items to match.
-	for _, m := range match {
-		if s == m {
-			return true
+func contains(match []string, a ...string) bool {
+	// Iterate over the items in the slice.
+	for _, s := range a {
+		// Iterate over the items to match.
+		for _, m := range match {
+			if s == m {
+				return true
+			}
 		}
 	}
 	return false

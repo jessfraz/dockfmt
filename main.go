@@ -46,7 +46,7 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-		if p.FlagSet.NArg() < 1 && os.Args[1] != "version" {
+		if p.FlagSet.NArg() < 1 {
 			return errors.New("Please pass in Dockerfile(s)")
 		}
 
