@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,8 +16,32 @@ import (
 	"strings"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
-	"github.com/urfave/cli"
 )
+
+const formatHelp = `Format the Dockerfile(s).`
+
+func (cmd *formatCommand) Name() string      { return "fmt" }
+func (cmd *formatCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *formatCommand) ShortHelp() string { return formatHelp }
+func (cmd *formatCommand) LongHelp() string  { return formatHelp }
+func (cmd *formatCommand) Hidden() bool      { return false }
+
+func (cmd *formatCommand) Register(fs *flag.FlagSet) {
+	fs.BoolVar(&cmd.diff, "diff", false, "display diffs instead of rewriting files")
+	fs.BoolVar(&cmd.diff, "D", false, "display diffs instead of rewriting files")
+
+	fs.BoolVar(&cmd.list, "list", false, "list files whose formatting differs from dockfmt's")
+	fs.BoolVar(&cmd.list, "l", false, "list files whose formatting differs from dockfmt's")
+
+	fs.BoolVar(&cmd.write, "write", false, "write result to (source) file instead of stdout")
+	fs.BoolVar(&cmd.write, "w", false, "write result to (source) file instead of stdout")
+}
+
+type formatCommand struct {
+	diff  bool
+	list  bool
+	write bool
+}
 
 type file struct {
 	currentLine  int
@@ -23,8 +49,8 @@ type file struct {
 	originalFile []byte
 }
 
-func format(c *cli.Context) error {
-	err := forFile(c, func(f string, nodes []*parser.Node) error {
+func (cmd *formatCommand) Run(ctx context.Context, args []string) error {
+	err := forFile(args, func(f string, nodes []*parser.Node) error {
 		og, err := ioutil.ReadFile(f)
 		if err != nil {
 			return err
@@ -46,7 +72,7 @@ func format(c *cli.Context) error {
 		}
 
 		// display the diff if requested
-		if c.Bool("diff") {
+		if cmd.diff {
 			d, err := diff(og, []byte(result))
 			if err != nil {
 				return fmt.Errorf("computing diff: %s", err)
@@ -55,14 +81,14 @@ func format(c *cli.Context) error {
 			os.Stdout.Write(d)
 		}
 
-		if c.Bool("list") {
+		if cmd.list {
 			if !bytes.Equal(og, []byte(result)) {
 				fmt.Fprintln(os.Stdout, f)
 			}
 		}
 
 		// write to the file
-		if c.Bool("write") {
+		if cmd.write {
 			// make a temporary backup before overwriting original
 			bakname, err := backupFile(f+".", og, 0644)
 			if err != nil {
@@ -79,7 +105,7 @@ func format(c *cli.Context) error {
 			}
 		}
 
-		if !c.Bool("diff") && !c.Bool("list") && !c.Bool("write") {
+		if !cmd.diff && !cmd.list && !cmd.write {
 			os.Stdout.Write([]byte(result))
 		}
 
@@ -208,7 +234,7 @@ func fmtRun(s string) string {
 		// handle `apk add` commands
 		if strings.HasPrefix(c, "apk add") {
 			c = strings.TrimPrefix(c, "apk add")
-			// remove --no-cache
+			// format --no-cache
 			// we will add it back later
 			c = strings.Replace(c, "--no-cache", "", -1)
 			c = strings.Replace(c, "apk add", "", -1)
@@ -219,7 +245,7 @@ func fmtRun(s string) string {
 		// handle `apt-get install` commands
 		if strings.HasPrefix(c, "apt-get install") {
 			c = strings.TrimPrefix(c, "apt-get install")
-			// remove -y
+			// format -y
 			// we will add it back later
 			c = strings.Replace(c, "-y", "", -1)
 			c = strings.Replace(c, "apt-get install", "", -1)

@@ -32,34 +32,23 @@ $ go get github.com/jessfraz/dockfmt
 
 ## Usage
 
-**Help output**
-
 ```console
 $ dockfmt -h
-NAME:
-   dockfmt - Dockerfile format.
+dockfmt -  Dockerfile format.
 
-USAGE:
-   dockfmt [global options] command [command options] [arguments...]
+Usage: dockfmt <command>
 
-VERSION:
-   v0.3.1
+Flags:
 
-AUTHOR(S):
-   @jessfraz <no-reply@butts.com>
+  -d, --debug  enable debug logging (default: false)
 
-COMMANDS:
-     base         list the base image used in Dockerfile(s)
-     dump         dump parsed Dockerfile(s)
-     format, fmt  format the Dockerfile(s)
-     maintainer   list the maintainer for Dockerfile(s)
-     help, h      Shows a list of commands or help for one command
+Commands:
 
-GLOBAL OPTIONS:
-   --debug, -D    run in debug mode
-   --help, -h     show help
-   --version, -v  print the version
-
+  base        List the base image used in the Dockerfile(s).
+  dump        Dump parsed Dockerfile(s).
+  fmt         Format the Dockerfile(s).
+  maintainer  List the maintainer for the Dockerfile(s).
+  version     Show the version information.
 ```
 
 ### Format
@@ -68,16 +57,16 @@ GLOBAL OPTIONS:
 
 ```console
 $ dockfmt fmt -h
-NAME:
-   dockfmt format - format the Dockerfile(s)
+Usage: dockfmt fmt [OPTIONS] DOCKERFILE [DOCKERFILE...]
 
-USAGE:
-   dockfmt format [command options] [arguments...]
+Format the Dockerfile(s).
 
-OPTIONS:
-   --diff, -d   display diffs instead of rewriting files
-   --list, -l   list files whose formatting differs from dockfmt's
-   --write, -w  write result to (source) file instead of stdout
+Flags:
+
+  -D, --diff   display diffs instead of rewriting files (default: false)
+  -d, --debug  enable debug logging (default: false)
+  -l, --list   list files whose formatting differs from dockfmt's (default: false)
+  -w, --write  write result to (source) file instead of stdout (default: false)
 ```
 
 #### Get a diff

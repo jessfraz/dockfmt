@@ -1,18 +1,31 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
 	"text/tabwriter"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
-	"github.com/urfave/cli"
 )
 
-func getMaintainer(c *cli.Context) error {
+const maintainerHelp = `List the maintainer for the Dockerfile(s).`
+
+func (cmd *maintainerCommand) Name() string      { return "maintainer" }
+func (cmd *maintainerCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *maintainerCommand) ShortHelp() string { return maintainerHelp }
+func (cmd *maintainerCommand) LongHelp() string  { return maintainerHelp }
+func (cmd *maintainerCommand) Hidden() bool      { return false }
+
+func (cmd *maintainerCommand) Register(fs *flag.FlagSet) {}
+
+type maintainerCommand struct{}
+
+func (cmd *maintainerCommand) Run(ctx context.Context, args []string) error {
 	maintainers := map[string]int{}
 
-	err := forFile(c, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f string, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			maintainers = nodeSearch("maintainer", n, maintainers)
 		}

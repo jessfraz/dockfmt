@@ -1,94 +1,60 @@
 package main
 
 import (
+	"context"
 	"errors"
-	"fmt"
+	"flag"
 	"os"
 	"sort"
 
+	"github.com/genuinetools/pkg/cli"
 	"github.com/jessfraz/dockfmt/version"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
 )
 
-// preload initializes any global options and configuration
-// before the main or sub commands are run.
-func preload(c *cli.Context) (err error) {
-	if c.GlobalBool("debug") {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	if len(c.Args()) < 1 {
-		return errors.New("please supply filename(s)")
-	}
-
-	return nil
-}
+var (
+	debug bool
+)
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "dockfmt"
-	app.Version = version.VERSION
-	app.Author = "@jessfraz"
-	app.Email = "no-reply@butts.com"
-	app.Usage = "Dockerfile format."
-	app.Before = preload
-	app.Flags = []cli.Flag{
-		cli.BoolFlag{
-			Name:  "debug, D",
-			Usage: "run in debug mode",
-		},
+	// Create a new cli program.
+	p := cli.NewProgram()
+	p.Name = "dockfmt"
+	p.Description = "Dockerfile format."
+
+	// Set the GitCommit and Version.
+	p.GitCommit = version.GITCOMMIT
+	p.Version = version.VERSION
+
+	// Setup the global flags.
+	p.FlagSet = flag.NewFlagSet("global", flag.ExitOnError)
+	p.FlagSet.BoolVar(&debug, "debug", false, "enable debug logging")
+	p.FlagSet.BoolVar(&debug, "d", false, "enable debug logging")
+
+	p.Commands = []cli.Command{
+		&baseCommand{},
+		&dumpCommand{},
+		&formatCommand{},
+		&maintainerCommand{},
 	}
 
-	app.Commands = []cli.Command{
-		{
-			Name:   "base",
-			Usage:  "list the base image used in Dockerfile(s)",
-			Action: getBase,
-		},
-		{
-			Name:  "dump",
-			Usage: "dump parsed Dockerfile(s)",
-			Action: func(c *cli.Context) error {
-				err := forFile(c, func(f string, nodes []*parser.Node) error {
-					fmt.Println(f)
-					if len(nodes) > 0 {
-						fmt.Println(nodes[0].Dump())
-					}
-					return nil
-				})
-				return err
-			},
-		},
-		{
-			Name:    "format",
-			Aliases: []string{"fmt"},
-			Usage:   "format the Dockerfile(s)",
-			Flags: []cli.Flag{
-				cli.BoolFlag{
-					Name:  "diff, d",
-					Usage: "display diffs instead of rewriting files",
-				},
-				cli.BoolFlag{
-					Name:  "list, l",
-					Usage: "list files whose formatting differs from dockfmt's",
-				},
-				cli.BoolFlag{
-					Name:  "write, w",
-					Usage: "write result to (source) file instead of stdout",
-				},
-			},
-			Action: format,
-		},
-		{
-			Name:   "maintainer",
-			Usage:  "list the maintainer for Dockerfile(s)",
-			Action: getMaintainer,
-		},
+	// Set the before function.
+	p.Before = func(ctx context.Context) error {
+		// Set the log level.
+		if debug {
+			logrus.SetLevel(logrus.DebugLevel)
+		}
+
+		if p.FlagSet.NArg() < 1 && os.Args[1] != "version" {
+			return errors.New("Please pass in Dockerfile(s)")
+		}
+
+		return nil
 	}
 
-	app.Run(os.Args)
+	// Run our program.
+	p.Run()
 }
 
 type pair struct {
@@ -125,9 +91,10 @@ func nodeSearch(search string, n *parser.Node, a map[string]int) map[string]int 
 	return a
 }
 
-func forFile(c *cli.Context, fnc func(string, []*parser.Node) error) error {
-	for _, fn := range c.Args() {
-		logrus.Debugf("File: %s", fn)
+func forFile(args []string, fnc func(string, []*parser.Node) error) error {
+	for _, fn := range args {
+		logrus.Debugf("parsing file: %s", fn)
+
 		f, err := os.Open(fn)
 		if err != nil {
 			return err

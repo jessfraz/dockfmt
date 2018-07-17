@@ -1,18 +1,31 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
 	"text/tabwriter"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
-	"github.com/urfave/cli"
 )
 
-func getBase(c *cli.Context) error {
+const baseHelp = `List the base image used in the Dockerfile(s).`
+
+func (cmd *baseCommand) Name() string      { return "base" }
+func (cmd *baseCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *baseCommand) ShortHelp() string { return baseHelp }
+func (cmd *baseCommand) LongHelp() string  { return baseHelp }
+func (cmd *baseCommand) Hidden() bool      { return false }
+
+func (cmd *baseCommand) Register(fs *flag.FlagSet) {}
+
+type baseCommand struct{}
+
+func (cmd *baseCommand) Run(ctx context.Context, args []string) error {
 	images := map[string]int{}
 
-	err := forFile(c, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f string, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			images = nodeSearch("from", n, images)
 		}
@@ -34,5 +47,6 @@ func getBase(c *cli.Context) error {
 	}
 
 	w.Flush()
+
 	return nil
 }
