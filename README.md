@@ -1,26 +1,32 @@
 # dockfmt
 
-[![Travis
-CI](https://travis-ci.org/jessfraz/dockfmt.svg?branch=master)](https://travis-ci.org/jessfraz/dockfmt)
+[![Travis CI](https://travis-ci.org/jessfraz/dockfmt.svg?branch=master)](https://travis-ci.org/jessfraz/dockfmt)
 
 Dockerfile format.
 
-This is a work in progress so calm yourself if you want to file 80 bajillion
+**NOTE:** This is a work in progress so calm yourself if you want to file 80 bajillion
 issues.
+
+ * [Installation](README.md#installation)
+      * [Binaries](README.md#binaries)
+      * [Via Go](README.md#via-go)
+ * [Usage](README.md#usage)
+   * [Format](README.md#format)
+      * [Get help](README.md#get-help)
+      * [Get a diff](README.md#get-a-diff)
+      * [List multiple files with different output](README.md#list-multiple-files-with-different-output)
+   * [Base image inspection](README.md#base-image-inspection)
+   * [Maintainer inspection](README.md#maintainer-inspection)
 
 ## Installation
 
 #### Binaries
 
-- **darwin** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-darwin-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-darwin-amd64)
-- **freebsd** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-freebsd-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-freebsd-amd64)
-- **linux** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-amd64) / [arm](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-arm) / [arm64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-linux-arm64)
-- **solaris** [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-solaris-amd64)
-- **windows** [386](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-windows-386) / [amd64](https://github.com/jessfraz/dockfmt/releases/download/v0.3.1/dockfmt-windows-amd64)
+For installation instructions from binaries please visit the [Releases Page](https://github.com/jessfraz/dockfmt/releases).
 
 #### Via Go
 
-```bash
+```console
 $ go get github.com/jessfraz/dockfmt
 ```
 
@@ -58,7 +64,7 @@ GLOBAL OPTIONS:
 
 ### Format
 
-**help output**
+#### Get help
 
 ```console
 $ dockfmt fmt -h
@@ -74,7 +80,7 @@ OPTIONS:
    --write, -w  write result to (source) file instead of stdout
 ```
 
-**get a diff**
+#### Get a diff
 
 ```console
 $ dockfmt format -d htop/Dockerfile
@@ -99,7 +105,7 @@ diff htop/Dockerfile dockfmt/htop/Dockerfile
 +CMD	["htop"]
 ```
 
-**list multiple files with different output**
+#### List multiple files with different output
 
 ```console
 $ dockfmt fmt -l */Dockerfile */*/Dockerfile
@@ -152,4 +158,3 @@ Justin Garrison <justinleegarrison@hskdl.com>   2
 Daniel Romero <infoslack@jjskl.com>             1
 Cris G c@skdlemfhtj.com                         1
 ```
-

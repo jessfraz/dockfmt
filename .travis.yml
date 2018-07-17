@@ -18,39 +18,39 @@ jobs:
       deploy:
         provider: releases
         file:
-          - cross/dockfmt-linux-amd64.md5
-          - cross/dockfmt-windows-386.sha256
-          - cross/dockfmt-linux-arm
-          - cross/dockfmt-darwin-amd64.md5
           - cross/dockfmt-darwin-amd64
-          - cross/dockfmt-solaris-amd64.md5
-          - cross/dockfmt-linux-arm64.sha256
-          - cross/dockfmt-linux-arm.sha256
-          - cross/dockfmt-linux-386.sha256
+          - cross/dockfmt-darwin-amd64.md5
+          - cross/dockfmt-darwin-amd64.sha256
+          - cross/dockfmt-darwin-386
           - cross/dockfmt-darwin-386.md5
-          - cross/dockfmt-windows-386.md5
+          - cross/dockfmt-darwin-386.sha256
+          - cross/dockfmt-freebsd-amd64
           - cross/dockfmt-freebsd-amd64.md5
-          - cross/dockfmt-linux-arm64.md5
-          - cross/dockfmt-linux-arm64
           - cross/dockfmt-freebsd-amd64.sha256
-          - cross/dockfmt-freebsd-386.md5
-          - cross/dockfmt-linux-amd64.sha256
-          - cross/dockfmt-linux-386.md5
           - cross/dockfmt-freebsd-386
+          - cross/dockfmt-freebsd-386.md5
+          - cross/dockfmt-freebsd-386.sha256
+          - cross/dockfmt-linux-arm
+          - cross/dockfmt-linux-arm.md5
+          - cross/dockfmt-linux-arm.sha256
+          - cross/dockfmt-linux-arm64
+          - cross/dockfmt-linux-arm64.md5
+          - cross/dockfmt-linux-arm64.sha256
+          - cross/dockfmt-linux-amd64
+          - cross/dockfmt-linux-amd64.md5
+          - cross/dockfmt-linux-amd64.sha256
+          - cross/dockfmt-linux-386
+          - cross/dockfmt-linux-386.md5
+          - cross/dockfmt-linux-386.sha256
+          - cross/dockfmt-solaris-amd64
+          - cross/dockfmt-solaris-amd64.md5
           - cross/dockfmt-solaris-amd64.sha256
           - cross/dockfmt-windows-amd64
           - cross/dockfmt-windows-amd64.md5
           - cross/dockfmt-windows-amd64.sha256
-          - cross/dockfmt-linux-arm.md5
-          - cross/dockfmt-darwin-386.sha256
-          - cross/dockfmt-darwin-amd64.sha256
           - cross/dockfmt-windows-386
-          - cross/dockfmt-solaris-amd64
-          - cross/dockfmt-darwin-386
-          - cross/dockfmt-linux-386
-          - cross/dockfmt-freebsd-amd64
-          - cross/dockfmt-freebsd-386.sha256
-          - cross/dockfmt-linux-amd64
+          - cross/dockfmt-windows-386.md5
+          - cross/dockfmt-windows-386.sha256
         skip_cleanup: true
         on:
           tags: true
