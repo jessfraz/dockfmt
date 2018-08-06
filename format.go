@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -223,6 +224,27 @@ func fmtCopy(node *parser.Node) string {
 }
 
 func fmtRun(s string) string {
+	// this regex matches single and double quoted strings & ignores escaped chars
+	/*
+		(?:
+			[^\\]			// must not begin with escape char "\"
+			(\\.)*			// ignore any escaped chars before the first quote
+		)(
+			'(?:\\.|[^\\'])*'	// find string(s) that start & end with single quotes & ignore escaped chars
+			|			// or
+			"(?:\\.|[^\\"])*"	// find string(s) that start & end with double quotes & ignore escaped chars
+		)
+	*/
+	regexQuotes, _ := regexp.Compile(`(?:[^\\]((\\.)*))('(?:\\.|[^\\'])*'|"(?:\\.|[^\\"])*")`)
+ 	// escape any &'s between quotes
+	// this should be done first before handling the &&'s outside of quotes
+	s = regexQuotes.ReplaceAllStringFunc(s, func(q string) string {
+		// the regex grabs one char before the first quote to ensure the quote isn't escaped
+		// ignore this first char in case it's an '&'
+		escaped := strings.Replace(q[1:], "&", "\\&", -1)
+		return string(q[0]) + escaped
+	})
+	
 	s = strings.Replace(s, "apk update && apk add", "apk add --no-cache", -1)
 
 	var r string
@@ -252,6 +274,12 @@ func fmtRun(s string) string {
 			// recreate the command
 			c = "apt-get install -y \\" + "\n" + splitLinesWord(c)
 		}
+		
+		// return any &'s between quotes back to how they were
+		c = regexQuotes.ReplaceAllStringFunc(c, func(q string) string {
+			escaped := strings.Replace(q, "\\&", "&", -1)
+			return escaped
+		})
 
 		// we aren't on the first line add back the `&&`
 		if i != 0 {
