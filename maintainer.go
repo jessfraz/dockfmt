@@ -28,6 +28,7 @@ func (cmd *maintainerCommand) Run(ctx context.Context, args []string) error {
 	err := forFile(args, func(f string, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			maintainers = nodeSearch("maintainer", n, maintainers)
+			maintainers = labelSearch("maintainer", n, maintainers)
 		}
 		return nil
 	})

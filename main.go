@@ -6,6 +6,7 @@ import (
 	"flag"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/genuinetools/pkg/cli"
 	"github.com/jessfraz/dockfmt/version"
@@ -79,12 +80,28 @@ func rank(images map[string]int) pairList {
 	return pl
 }
 
+func labelSearch(search string, n *parser.Node, a map[string]int) map[string]int {
+	if n.Value == "label" {
+		if n.Next != nil && strings.ToLower(n.Next.Value) == strings.ToLower(search) {
+			i := strings.Trim(n.Next.Next.Value, "\"")
+			if v, ok := a[i]; ok {
+				a[i] = v + 1
+			} else {
+				a[i] = 1
+
+			}
+		}
+	}
+	return a
+}
+
 func nodeSearch(search string, n *parser.Node, a map[string]int) map[string]int {
 	if n.Value == search {
-		if v, ok := a[n.Next.Value]; ok {
-			a[n.Next.Value] = v + 1
+		i := strings.Trim(n.Next.Value, "\"")
+		if v, ok := a[i]; ok {
+			a[i] = v + 1
 		} else {
-			a[n.Next.Value] = 1
+			a[i] = 1
 
 		}
 	}
