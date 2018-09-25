@@ -1,6 +1,7 @@
 # dockfmt
 
-[![Travis CI](https://travis-ci.org/jessfraz/dockfmt.svg?branch=master)](https://travis-ci.org/jessfraz/dockfmt)
+[![Travis CI](https://img.shields.io/travis/jessfraz/dockfmt.svg?style=for-the-badge)](https://travis-ci.org/jessfraz/dockfmt)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/jessfraz/dockfmt)
 
 Dockerfile format.
 
