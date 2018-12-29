@@ -12,6 +12,17 @@ issues.
 
 <!-- toc -->
 
+- [Installation](#installation)
+    + [Binaries](#binaries)
+    + [Via Go](#via-go)
+- [Usage](#usage)
+  * [Format](#format)
+    + [Get help](#get-help)
+    + [Get a diff](#get-a-diff)
+    + [List multiple files with different output](#list-multiple-files-with-different-output)
+  * [Base image inspection](#base-image-inspection)
+  * [Maintainer inspection](#maintainer-inspection)
+
 <!-- tocstop -->
 
 ## Installation
