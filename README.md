@@ -8,16 +8,11 @@ Dockerfile format.
 **NOTE:** This is a work in progress so calm yourself if you want to file 80 bajillion
 issues.
 
- * [Installation](README.md#installation)
-      * [Binaries](README.md#binaries)
-      * [Via Go](README.md#via-go)
- * [Usage](README.md#usage)
-   * [Format](README.md#format)
-      * [Get help](README.md#get-help)
-      * [Get a diff](README.md#get-a-diff)
-      * [List multiple files with different output](README.md#list-multiple-files-with-different-output)
-   * [Base image inspection](README.md#base-image-inspection)
-   * [Maintainer inspection](README.md#maintainer-inspection)
+**Table of Contents**
+
+<!-- toc -->
+
+<!-- tocstop -->
 
 ## Installation
 
