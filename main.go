@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"os"
 	"sort"
@@ -45,10 +44,6 @@ func main() {
 		// Set the log level.
 		if debug {
 			logrus.SetLevel(logrus.DebugLevel)
-		}
-
-		if p.FlagSet.NArg() < 1 {
-			return errors.New("Please pass in Dockerfile(s)")
 		}
 
 		return nil
@@ -124,6 +119,9 @@ func forFile1(f *os.File, fnc forFileFunc) error {
 }
 
 func forFile(args []string, fnc forFileFunc) error {
+	if len(args) == 0 {
+		return forFile1(os.Stdin, fnc)
+	}
 	for _, fn := range args {
 		logrus.Debugf("parsing file: %s", fn)
 
