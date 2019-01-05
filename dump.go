@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 )
@@ -21,8 +22,8 @@ func (cmd *dumpCommand) Register(fs *flag.FlagSet) {}
 type dumpCommand struct{}
 
 func (cmd *dumpCommand) Run(ctx context.Context, args []string) error {
-	return forFile(args, func(f string, nodes []*parser.Node) error {
-		fmt.Println(f)
+	return forFile(args, func(f *os.File, nodes []*parser.Node) error {
+		fmt.Println(f.Name())
 		if len(nodes) > 0 {
 			fmt.Println(nodes[0].Dump())
 		}

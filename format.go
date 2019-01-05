@@ -51,15 +51,15 @@ type file struct {
 }
 
 func (cmd *formatCommand) Run(ctx context.Context, args []string) error {
-	err := forFile(args, func(f string, nodes []*parser.Node) error {
-		og, err := ioutil.ReadFile(f)
+	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
+		og, err := ioutil.ReadAll(f)
 		if err != nil {
 			return err
 		}
 
 		df := file{
 			currentLine:  1,
-			name:         f,
+			name:         f.Name(),
 			originalFile: og,
 		}
 
@@ -78,26 +78,26 @@ func (cmd *formatCommand) Run(ctx context.Context, args []string) error {
 			if err != nil {
 				return fmt.Errorf("computing diff: %s", err)
 			}
-			fmt.Printf("diff %s dockfmt/%s\n", f, f)
+			fmt.Printf("diff %s dockfmt/%s\n", f.Name(), f.Name())
 			os.Stdout.Write(d)
 		}
 
 		if cmd.list {
 			if !bytes.Equal(og, []byte(result)) {
-				fmt.Fprintln(os.Stdout, f)
+				fmt.Fprintln(os.Stdout, f.Name())
 			}
 		}
 
 		// write to the file
 		if cmd.write {
 			// make a temporary backup before overwriting original
-			bakname, err := backupFile(f+".", og, 0644)
+			bakname, err := backupFile(f.Name()+".", og, 0644)
 			if err != nil {
 				return err
 			}
 
-			if err := ioutil.WriteFile(f, []byte(result), 0644); err != nil {
-				os.Rename(bakname, f)
+			if err := ioutil.WriteFile(f.Name(), []byte(result), 0644); err != nil {
+				os.Rename(bakname, f.Name())
 				return err
 			}
 
