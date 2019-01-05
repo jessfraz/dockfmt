@@ -108,7 +108,22 @@ func nodeSearch(search string, n *parser.Node, a map[string]int) map[string]int 
 	return a
 }
 
-func forFile(args []string, fnc func(*os.File, []*parser.Node) error) error {
+type forFileFunc func(*os.File, []*parser.Node) error
+
+func forFile1(f *os.File, fnc forFileFunc) error {
+	result, err := parser.Parse(f)
+	if err != nil {
+		return err
+	}
+	ast := result.AST
+	nodes := []*parser.Node{ast}
+	if ast.Children != nil {
+		nodes = append(nodes, ast.Children...)
+	}
+	return fnc(f, nodes)
+}
+
+func forFile(args []string, fnc forFileFunc) error {
 	for _, fn := range args {
 		logrus.Debugf("parsing file: %s", fn)
 
@@ -118,16 +133,7 @@ func forFile(args []string, fnc func(*os.File, []*parser.Node) error) error {
 		}
 		defer f.Close()
 
-		result, err := parser.Parse(f)
-		if err != nil {
-			return err
-		}
-		ast := result.AST
-		nodes := []*parser.Node{ast}
-		if ast.Children != nil {
-			nodes = append(nodes, ast.Children...)
-		}
-		if err := fnc(f, nodes); err != nil {
+		if err = forFile1(f, fnc); err != nil {
 			return err
 		}
 	}
