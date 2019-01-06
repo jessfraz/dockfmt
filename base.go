@@ -13,7 +13,7 @@ import (
 const baseHelp = `List the base image used in the Dockerfile(s).`
 
 func (cmd *baseCommand) Name() string      { return "base" }
-func (cmd *baseCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *baseCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *baseCommand) ShortHelp() string { return baseHelp }
 func (cmd *baseCommand) LongHelp() string  { return baseHelp }
 func (cmd *baseCommand) Hidden() bool      { return false }

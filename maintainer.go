@@ -13,7 +13,7 @@ import (
 const maintainerHelp = `List the maintainer for the Dockerfile(s).`
 
 func (cmd *maintainerCommand) Name() string      { return "maintainer" }
-func (cmd *maintainerCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *maintainerCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *maintainerCommand) ShortHelp() string { return maintainerHelp }
 func (cmd *maintainerCommand) LongHelp() string  { return maintainerHelp }
 func (cmd *maintainerCommand) Hidden() bool      { return false }

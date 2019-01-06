@@ -12,7 +12,7 @@ import (
 const dumpHelp = `Dump parsed Dockerfile(s).`
 
 func (cmd *dumpCommand) Name() string      { return "dump" }
-func (cmd *dumpCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *dumpCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *dumpCommand) ShortHelp() string { return dumpHelp }
 func (cmd *dumpCommand) LongHelp() string  { return dumpHelp }
 func (cmd *dumpCommand) Hidden() bool      { return false }

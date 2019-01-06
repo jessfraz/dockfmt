@@ -22,7 +22,7 @@ import (
 const formatHelp = `Format the Dockerfile(s).`
 
 func (cmd *formatCommand) Name() string      { return "fmt" }
-func (cmd *formatCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *formatCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *formatCommand) ShortHelp() string { return formatHelp }
 func (cmd *formatCommand) LongHelp() string  { return formatHelp }
 func (cmd *formatCommand) Hidden() bool      { return false }
