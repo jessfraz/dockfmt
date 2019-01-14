@@ -21,14 +21,10 @@ func (cmd *workdirCommand) Hidden() bool      { return false }
 func (cmd *workdirCommand) Register(fs *flag.FlagSet) {
 	fs.BoolVar(&cmd.noRank, "no-rank", false, "turn off ranking of WORKDIRs")
 	fs.BoolVar(&cmd.noRank, "N", false, "turn off ranking of WORKDIRs")
-
-	fs.BoolVar(&cmd.skipHeader, "skip-header", false, "skip printing headers")
-	fs.BoolVar(&cmd.skipHeader, "S", false, "skip printing headers")
 }
 
 type workdirCommand struct {
-	noRank     bool
-	skipHeader bool
+	noRank bool
 }
 
 func (cmd *workdirCommand) Run(ctx context.Context, args []string) error {
@@ -48,19 +44,15 @@ func (cmd *workdirCommand) Run(ctx context.Context, args []string) error {
 	w := tabwriter.NewWriter(os.Stdout, 20, 1, 3, ' ', 0)
 
 	if cmd.noRank {
-		if !cmd.skipHeader {
-			// print header
-			fmt.Fprintln(w, "WORKDIR")
-		}
+		// print header
+		fmt.Fprintln(w, "WORKDIR")
 
 		for workdir := range workdirs {
 			fmt.Fprintf(w, "%s\n", workdir)
 		}
 	} else {
-		if !cmd.skipHeader {
-			// print header
-			fmt.Fprintln(w, "WORKDIR\tCOUNT")
-		}
+		// print header
+		fmt.Fprintln(w, "WORKDIR\tCOUNT")
 
 		pl := rank(workdirs)
 		for _, p := range pl {
