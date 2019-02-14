@@ -79,7 +79,7 @@ Flags:
 #### Get a diff
 
 ```console
-$ dockfmt format -d htop/Dockerfile
+$ dockfmt fmt -d htop/Dockerfile
 diff htop/Dockerfile dockfmt/htop/Dockerfile
 --- /tmp/dockfmt143910590	2016-09-19 15:59:22.612250710 -0700
 +++ /tmp/dockfmt412224773	2016-09-19 15:59:22.612250710 -0700
