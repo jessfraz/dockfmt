@@ -48,7 +48,7 @@ func main() {
 		}
 
 		if p.FlagSet.NArg() < 1 {
-			return errors.New("Please pass in Dockerfile(s)")
+			return errors.New("pass in Dockerfile(s)")
 		}
 
 		return nil
@@ -82,7 +82,7 @@ func rank(images map[string]int) pairList {
 
 func labelSearch(search string, n *parser.Node, a map[string]int) map[string]int {
 	if n.Value == "label" {
-		if n.Next != nil && strings.ToLower(n.Next.Value) == strings.ToLower(search) {
+		if n.Next != nil && strings.EqualFold(n.Next.Value, search) {
 			i := strings.Trim(n.Next.Next.Value, "\"")
 			if v, ok := a[i]; ok {
 				a[i] = v + 1
