@@ -23,6 +23,7 @@ issues.
   * [Base image inspection](#base-image-inspection)
   * [Maintainer inspection](#maintainer-inspection)
   * [Stage inspection](#stage-inspection)
+  * [Workdir inspection](#workdir-inspection)
 
 <!-- tocstop -->
 
