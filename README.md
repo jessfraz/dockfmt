@@ -57,6 +57,7 @@ Commands:
   dump        Dump parsed Dockerfile(s).
   fmt         Format the Dockerfile(s).
   maintainer  List the maintainer for the Dockerfile(s).
+  stages      List the stages in the Dockerfile.
   workdir     List the workdirs for the Dockerfile(s).
   version     Show the version information.
 ```

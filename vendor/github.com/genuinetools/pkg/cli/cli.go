@@ -15,6 +15,8 @@ import (
 const (
 	// GitCommitKey is the key for the program's GitCommit data.
 	GitCommitKey ContextKey = "program.GitCommit"
+	// NameKey is the key for the program's name.
+	NameKey ContextKey = "program.Name"
 	// VersionKey is the key for the program's Version data.
 	VersionKey ContextKey = "program.Version"
 )
@@ -42,9 +44,9 @@ type Program struct {
 	// but after the context is ready.
 	// If a non-nil error is returned, no subcommands are run.
 	Before func(context.Context) error
-	// After defines a function to execute after any subcommands are run,
-	// but after the subcommand has finished.
-	// It is run even if the subcommand returns an error.
+	// After defines a function to execute after any commands or action is run
+	// and has finished.
+	// It is run _only_ if the subcommand exits without an error.
 	After func(context.Context) error
 
 	// Action is the function to execute when no subcommands are specified.
@@ -137,101 +139,79 @@ func (p *Program) run(ctx context.Context, args []string) error {
 	}
 
 	// Check if the command exists.
-	var commandExists bool
-	if len(args) > 1 && in(args[1], p.Commands) {
-		commandExists = true
-	}
-
-	// If we are not running a commands we know, then automatically
-	// run the main action of the program instead.
-	// Also enter this loop if we weren't passed any arguments.
-	if p.Action != nil &&
-		(len(args) < 2 || !commandExists) {
-		return p.runAction(ctx, args)
+	var (
+		command       Command
+		commandExists bool
+	)
+	if len(args) > 1 {
+		command = p.findCommand(args[1])
+		commandExists = command != nil
 	}
 
 	// Return early if we didn't enter the single action logic and
 	// the command does not exist or we were passed no commands.
-	if len(args) < 2 {
+	if p.Action == nil && len(args) < 2 {
 		return flag.ErrHelp
 	}
-	if !commandExists {
+	if p.Action == nil && !commandExists {
 		return fmt.Errorf("%s: no such command", args[1])
 	}
 
-	// Iterate over the commands in the program.
-	for _, command := range p.Commands {
-		if args[1] == command.Name() {
-			// Register the subcommand flags in with the common/global flags.
-			command.Register(p.FlagSet)
+	// If we are not running a command we know, then automatically
+	// run the main action of the program instead.
+	// Also enter this loop if we weren't passed any arguments.
+	if p.Action != nil &&
+		(len(args) < 2 || !commandExists) {
+		// Parse the flags the user gave us.
+		if err := p.FlagSet.Parse(args[1:]); err != nil {
+			return err
+		}
 
-			// Override the usage text to something nicer.
-			p.resetCommandUsage(command)
-
-			// Parse the flags the user gave us.
-			if err := p.FlagSet.Parse(args[2:]); err != nil {
+		// Run the main action _if_ we are not in the loop for the version command
+		// that is added by default.
+		if p.Before != nil {
+			if err := p.Before(ctx); err != nil {
 				return err
-			}
-
-			// Check that they didn't add a -h or --help flag after the subcommand's
-			// commands, like `cmd sub other thing -h`.
-			if contains([]string{"-h", "--help"}, args...) {
-				// Print the flag usage and exit.
-				return flag.ErrHelp
-			}
-
-			// Only execute the Before function for user-supplied commands.
-			// This excludes the version command we supply.
-			if p.Before != nil && command.Name() != "version" {
-				if err := p.Before(ctx); err != nil {
-					return err
-				}
-			}
-
-			// Run the command with the context and post-flag-processing args.
-			if err := command.Run(ctx, p.FlagSet.Args()); err != nil {
-				if p.After != nil {
-					p.After(ctx)
-				}
-
-				return err
-			}
-
-			// Run the after function.
-			if p.After != nil {
-				if err := p.After(ctx); err != nil {
-					return err
-				}
 			}
 		}
-	}
 
-	// Done.
-	return nil
-}
-
-func (p *Program) runAction(ctx context.Context, args []string) error {
-	// Parse the flags the user gave us.
-	if err := p.FlagSet.Parse(args[1:]); err != nil {
-		return flag.ErrHelp
-	}
-
-	// Run the main action _if_ we are not in the loop for the version command
-	// that is added by default.
-	if p.Before != nil {
-		if err := p.Before(ctx); err != nil {
+		// Run the action with the context and post-flag-processing args.
+		if err := p.Action(ctx, p.FlagSet.Args()); err != nil {
 			return err
 		}
 	}
 
-	// Run the action with the context and post-flag-processing args.
-	if err := p.Action(ctx, p.FlagSet.Args()); err != nil {
-		// Run the after function.
-		if p.After != nil {
-			p.After(ctx)
+	if commandExists {
+		// Register the subcommand flags in with the common/global flags.
+		command.Register(p.FlagSet)
+
+		// Override the usage text to something nicer.
+		p.resetCommandUsage(command)
+
+		// Parse the flags the user gave us.
+		if err := p.FlagSet.Parse(args[2:]); err != nil {
+			return err
 		}
 
-		return err
+		// Check that they didn't add a -h or --help flag after the subcommand's
+		// commands, like `cmd sub other thing -h`.
+		if contains([]string{"-h", "--help"}, args...) {
+			// Print the flag usage and exit.
+			return flag.ErrHelp
+		}
+
+		// Only execute the Before function for user-supplied commands.
+		// This excludes the version command we supply.
+		if p.Before != nil && command.Name() != "version" {
+			if err := p.Before(ctx); err != nil {
+				return err
+			}
+		}
+
+		// Run the command with the context and post-flag-processing args.
+		if err := command.Run(ctx, p.FlagSet.Args()); err != nil {
+			return err
+		}
 	}
 
 	// Run the after function.
@@ -366,13 +346,14 @@ func defaultFlagSet(n string) *flag.FlagSet {
 	return flag.NewFlagSet(n, flag.ExitOnError)
 }
 
-func in(a string, c []Command) bool {
-	for _, b := range c {
-		if b.Name() == a {
-			return true
+func (p *Program) findCommand(name string) Command {
+	// Iterate over the commands in the program.
+	for _, command := range p.Commands {
+		if command.Name() == name {
+			return command
 		}
 	}
-	return false
+	return nil
 }
 
 func contains(match []string, a ...string) bool {
@@ -391,5 +372,6 @@ func contains(match []string, a ...string) bool {
 func (p *Program) defaultContext() context.Context {
 	// Create the context with the values we need to pass to the version command.
 	ctx := context.WithValue(context.Background(), GitCommitKey, p.GitCommit)
+	ctx = context.WithValue(ctx, NameKey, p.Name)
 	return context.WithValue(ctx, VersionKey, p.Version)
 }

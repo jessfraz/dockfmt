@@ -39,7 +39,7 @@ func main() {
 		&formatCommand{},
 		&maintainerCommand{},
 		&stagesCommand{},
-    &workdirCommand{},
+		&workdirCommand{},
 	}
 
 	// Set the before function.

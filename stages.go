@@ -49,9 +49,8 @@ func (cmd *stagesCommand) Run(ctx context.Context, args []string) error {
 			w.Flush()
 			return err
 		}
-		switch cmd.(type) {
+		switch stage := cmd.(type) {
 		case *instructions.Stage:
-			stage := cmd.(*instructions.Stage)
 			stageName := stage.Name
 			interpolated := false
 
