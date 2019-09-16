@@ -30,7 +30,7 @@ type workdirCommand struct {
 func (cmd *workdirCommand) Run(ctx context.Context, args []string) error {
 	workdirs := map[string]int{}
 
-	err := forFile(args, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			workdirs = nodeSearch("workdir", n, workdirs)
 		}

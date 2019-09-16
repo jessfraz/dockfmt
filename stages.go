@@ -26,7 +26,7 @@ type stagesCommand struct{}
 func (cmd *stagesCommand) Run(ctx context.Context, args []string) error {
 	images := []*parser.Node{}
 
-	err := forFile(args, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			if n.Value == "from" {
 				images = append(images, n)

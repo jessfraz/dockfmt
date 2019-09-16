@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"os"
 	"sort"
@@ -48,11 +49,10 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-
 		if p.FlagSet.NArg() < 1 {
 			return errors.New("please pass in Dockerfile(s)")
 		}
-    
+
 		return nil
 	}
 
