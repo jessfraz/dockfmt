@@ -1,8 +1,8 @@
 # github.com/genuinetools/pkg v0.0.0-20180717194616-e057fa50f234
 github.com/genuinetools/pkg/cli
 # github.com/moby/buildkit v0.0.0-20180717184648-628681f8e4aa
-github.com/moby/buildkit/frontend/dockerfile/parser
 github.com/moby/buildkit/frontend/dockerfile/command
+github.com/moby/buildkit/frontend/dockerfile/parser
 # github.com/pkg/errors v0.8.0
 github.com/pkg/errors
 # github.com/sirupsen/logrus v1.0.5
