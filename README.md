@@ -56,6 +56,7 @@ Commands:
   dump        Dump parsed Dockerfile(s).
   fmt         Format the Dockerfile(s).
   maintainer  List the maintainer for the Dockerfile(s).
+  workdir     List the workdirs for the Dockerfile(s).
   version     Show the version information.
 ```
 
@@ -156,7 +157,6 @@ Daniel Romero <infoslack@jjskl.com>             1
 Cris G c@skdlemfhtj.com                         1
 ```
 
-
 ### Stage inspection
 
 ```console
@@ -165,4 +165,13 @@ STAGE               INTERPOLATED
 health-check        false
 python-deps         false
 stage-2             true
+```
+
+### Workdir inspection
+
+```console
+$ dockfmt workdir */Dockerfile */*/Dockerfile
+WORKDIR   COUNT
+/srv      3
+/app      1
 ```
