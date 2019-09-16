@@ -22,6 +22,8 @@ issues.
     + [List multiple files with different output](#list-multiple-files-with-different-output)
   * [Base image inspection](#base-image-inspection)
   * [Maintainer inspection](#maintainer-inspection)
+  * [Stage inspection](#stage-inspection)
+  * [Workdir inspection](#workdir-inspection)
 
 <!-- tocstop -->
 
@@ -55,6 +57,7 @@ Commands:
   dump        Dump parsed Dockerfile(s).
   fmt         Format the Dockerfile(s).
   maintainer  List the maintainer for the Dockerfile(s).
+  workdir     List the workdirs for the Dockerfile(s).
   version     Show the version information.
 ```
 
@@ -153,4 +156,23 @@ Christian Koep <christian.koep@ksldkfj.de>      11
 Justin Garrison <justinleegarrison@hskdl.com>   2
 Daniel Romero <infoslack@jjskl.com>             1
 Cris G c@skdlemfhtj.com                         1
+```
+
+### Stage inspection
+
+```console
+$ dockfmt stages Dockerfile
+STAGE               INTERPOLATED
+health-check        false
+python-deps         false
+stage-2             true
+```
+
+### Workdir inspection
+
+```console
+$ dockfmt workdir */Dockerfile */*/Dockerfile
+WORKDIR   COUNT
+/srv      3
+/app      1
 ```

@@ -1,7 +1,17 @@
+# github.com/docker/docker v1.13.1
+github.com/docker/docker/api/types/blkiodev
+github.com/docker/docker/api/types/container
+github.com/docker/docker/api/types/mount
+github.com/docker/docker/api/types/strslice
+# github.com/docker/go-connections v0.4.0
+github.com/docker/go-connections/nat
+# github.com/docker/go-units v0.3.3
+github.com/docker/go-units
 # github.com/genuinetools/pkg v0.0.0-20180717194616-e057fa50f234
 github.com/genuinetools/pkg/cli
 # github.com/moby/buildkit v0.0.0-20180717184648-628681f8e4aa
 github.com/moby/buildkit/frontend/dockerfile/command
+github.com/moby/buildkit/frontend/dockerfile/instructions
 github.com/moby/buildkit/frontend/dockerfile/parser
 # github.com/pkg/errors v0.8.0
 github.com/pkg/errors
