@@ -22,6 +22,7 @@ issues.
     + [List multiple files with different output](#list-multiple-files-with-different-output)
   * [Base image inspection](#base-image-inspection)
   * [Maintainer inspection](#maintainer-inspection)
+  * [Stage inspection](#stage-inspection)
 
 <!-- tocstop -->
 
