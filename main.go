@@ -38,6 +38,7 @@ func main() {
 		&dumpCommand{},
 		&formatCommand{},
 		&maintainerCommand{},
+		&stagesCommand{},
 	}
 
 	// Set the before function.

@@ -154,3 +154,14 @@ Justin Garrison <justinleegarrison@hskdl.com>   2
 Daniel Romero <infoslack@jjskl.com>             1
 Cris G c@skdlemfhtj.com                         1
 ```
+
+
+### Stage inspection
+
+```console
+$ dockfmt stages Dockerfile
+STAGE               INTERPOLATED
+health-check        false
+python-deps         false
+stage-2             true
+```
