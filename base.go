@@ -13,7 +13,7 @@ import (
 const baseHelp = `List the base image used in the Dockerfile(s).`
 
 func (cmd *baseCommand) Name() string      { return "base" }
-func (cmd *baseCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *baseCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *baseCommand) ShortHelp() string { return baseHelp }
 func (cmd *baseCommand) LongHelp() string  { return baseHelp }
 func (cmd *baseCommand) Hidden() bool      { return false }
@@ -25,7 +25,7 @@ type baseCommand struct{}
 func (cmd *baseCommand) Run(ctx context.Context, args []string) error {
 	images := map[string]int{}
 
-	err := forFile(args, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			images = nodeSearch("from", n, images)
 		}

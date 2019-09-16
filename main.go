@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"os"
 	"sort"
@@ -49,10 +48,11 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
+
 		if p.FlagSet.NArg() < 1 {
 			return errors.New("please pass in Dockerfile(s)")
 		}
-
+    
 		return nil
 	}
 
@@ -110,7 +110,25 @@ func nodeSearch(search string, n *parser.Node, a map[string]int) map[string]int 
 	return a
 }
 
-func forFile(args []string, fnc func(string, []*parser.Node) error) error {
+type forFileFunc func(*os.File, []*parser.Node) error
+
+func forFile1(f *os.File, fnc forFileFunc) error {
+	result, err := parser.Parse(f)
+	if err != nil {
+		return err
+	}
+	ast := result.AST
+	nodes := []*parser.Node{ast}
+	if ast.Children != nil {
+		nodes = append(nodes, ast.Children...)
+	}
+	return fnc(f, nodes)
+}
+
+func forFile(args []string, fnc forFileFunc) error {
+	if len(args) == 0 {
+		return forFile1(os.Stdin, fnc)
+	}
 	for _, fn := range args {
 		logrus.Debugf("parsing file: %s", fn)
 
@@ -120,16 +138,7 @@ func forFile(args []string, fnc func(string, []*parser.Node) error) error {
 		}
 		defer f.Close()
 
-		result, err := parser.Parse(f)
-		if err != nil {
-			return err
-		}
-		ast := result.AST
-		nodes := []*parser.Node{ast}
-		if ast.Children != nil {
-			nodes = append(nodes, ast.Children...)
-		}
-		if err := fnc(fn, nodes); err != nil {
+		if err = forFile1(f, fnc); err != nil {
 			return err
 		}
 	}

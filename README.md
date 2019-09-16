@@ -68,7 +68,7 @@ Commands:
 
 ```console
 $ dockfmt fmt -h
-Usage: dockfmt fmt [OPTIONS] DOCKERFILE [DOCKERFILE...]
+Usage: dockfmt fmt [OPTIONS] [DOCKERFILE...]
 
 Format the Dockerfile(s).
 

@@ -13,7 +13,7 @@ import (
 const maintainerHelp = `List the maintainer for the Dockerfile(s).`
 
 func (cmd *maintainerCommand) Name() string      { return "maintainer" }
-func (cmd *maintainerCommand) Args() string      { return "[OPTIONS] DOCKERFILE [DOCKERFILE...]" }
+func (cmd *maintainerCommand) Args() string      { return "[OPTIONS] [DOCKERFILE...]" }
 func (cmd *maintainerCommand) ShortHelp() string { return maintainerHelp }
 func (cmd *maintainerCommand) LongHelp() string  { return maintainerHelp }
 func (cmd *maintainerCommand) Hidden() bool      { return false }
@@ -25,7 +25,7 @@ type maintainerCommand struct{}
 func (cmd *maintainerCommand) Run(ctx context.Context, args []string) error {
 	maintainers := map[string]int{}
 
-	err := forFile(args, func(f string, nodes []*parser.Node) error {
+	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
 		for _, n := range nodes {
 			maintainers = nodeSearch("maintainer", n, maintainers)
 			maintainers = labelSearch("maintainer", n, maintainers)
