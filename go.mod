@@ -4,8 +4,6 @@ require (
 	github.com/genuinetools/pkg v0.0.0-20181022210355-2fcf164d37cb
 	github.com/moby/buildkit v0.6.1
 	github.com/sirupsen/logrus v1.4.3-0.20190807103436-de736cf91b92
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )
 
 replace github.com/hashicorp/go-immutable-radix => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
