@@ -2,8 +2,8 @@ module github.com/jessfraz/dockfmt
 
 require (
 	github.com/genuinetools/pkg v0.0.0-20181022210355-2fcf164d37cb
-	github.com/moby/buildkit v0.6.1
-	github.com/sirupsen/logrus v1.4.3-0.20190807103436-de736cf91b92
+	github.com/moby/buildkit v0.12.5
+	github.com/sirupsen/logrus v1.9.0
 )
 
 replace github.com/hashicorp/go-immutable-radix => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
