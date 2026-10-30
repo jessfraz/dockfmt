@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build riscv64 && linux
-// +build riscv64,linux
 
 package unix
 
@@ -32,7 +31,7 @@ func Select(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (n int, err
 	if timeout != nil {
 		ts = &Timespec{Sec: timeout.Sec, Nsec: timeout.Usec * 1000}
 	}
-	return Pselect(nfd, r, w, e, ts, nil)
+	return pselect6(nfd, r, w, e, ts, nil)
 }
 
 //sys	sendfile(outfd int, infd int, offset *int64, count int) (written int, err error)
@@ -113,6 +112,9 @@ func Time(t *Time_t) (Time_t, error) {
 }
 
 func Utime(path string, buf *Utimbuf) error {
+	if buf == nil {
+		return Utimes(path, nil)
+	}
 	tv := []Timeval{
 		{Sec: buf.Actime},
 		{Sec: buf.Modtime},
@@ -177,3 +179,16 @@ func KexecFileLoad(kernelFd int, initrdFd int, cmdline string, flags int) error 
 	}
 	return kexecFileLoad(kernelFd, initrdFd, cmdlineLen, cmdline, flags)
 }
+
+//sys	riscvHWProbe(pairs []RISCVHWProbePairs, cpuCount uintptr, cpus *CPUSet, flags uint) (err error)
+
+func RISCVHWProbe(pairs []RISCVHWProbePairs, set *CPUSet, flags uint) (err error) {
+	var setSize uintptr
+
+	if set != nil {
+		setSize = uintptr(unsafe.Sizeof(*set))
+	}
+	return riscvHWProbe(pairs, setSize, set, flags)
+}
+
+const SYS_FSTATAT = SYS_NEWFSTATAT
