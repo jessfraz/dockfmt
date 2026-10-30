@@ -29,4 +29,4 @@ replace github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c => github
 
 replace golang.org/x/crypto v0.0.0-20190129210102-0709b304e793 => golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
 
-go 1.17
+go 1.20
