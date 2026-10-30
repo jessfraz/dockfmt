@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -52,7 +51,7 @@ type file struct {
 
 func (cmd *formatCommand) Run(ctx context.Context, args []string) error {
 	err := forFile(args, func(f *os.File, nodes []*parser.Node) error {
-		og, err := ioutil.ReadAll(f)
+		og, err := io.ReadAll(f)
 		if err != nil {
 			return err
 		}
@@ -96,7 +95,7 @@ func (cmd *formatCommand) Run(ctx context.Context, args []string) error {
 				return err
 			}
 
-			if err := ioutil.WriteFile(f.Name(), []byte(result), 0644); err != nil {
+			if err := os.WriteFile(f.Name(), []byte(result), 0644); err != nil {
 				os.Rename(bakname, f.Name())
 				return err
 			}
@@ -330,14 +329,14 @@ func splitLinesWord(s string) string {
 }
 
 func diff(b1, b2 []byte) (data []byte, err error) {
-	f1, err := ioutil.TempFile("", "dockfmt")
+	f1, err := os.CreateTemp("", "dockfmt")
 	if err != nil {
 		return
 	}
 	defer os.Remove(f1.Name())
 	defer f1.Close()
 
-	f2, err := ioutil.TempFile("", "dockfmt")
+	f2, err := os.CreateTemp("", "dockfmt")
 	if err != nil {
 		return
 	}
@@ -364,7 +363,7 @@ const chmodSupported = runtime.GOOS != "windows"
 // the chosen file name.
 func backupFile(filename string, data []byte, perm os.FileMode) (string, error) {
 	// create backup file
-	f, err := ioutil.TempFile(filepath.Dir(filename), filepath.Base(filename))
+	f, err := os.CreateTemp(filepath.Dir(filename), filepath.Base(filename))
 	if err != nil {
 		return "", err
 	}

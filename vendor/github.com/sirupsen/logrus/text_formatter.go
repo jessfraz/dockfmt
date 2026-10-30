@@ -34,6 +34,14 @@ type TextFormatter struct {
 	// Force disabling colors.
 	DisableColors bool
 
+	// Force quoting of all values
+	ForceQuote bool
+
+	// DisableQuote disables quoting for all values.
+	// DisableQuote will have a lower priority than ForceQuote.
+	// If both of them are set to true, quote will be forced on all values.
+	DisableQuote bool
+
 	// Override coloring based on CLICOLOR and CLICOLOR_FORCE. - https://bixense.com/clicolors/
 	EnvironmentOverrideColors bool
 
@@ -45,7 +53,10 @@ type TextFormatter struct {
 	// the time passed since beginning of execution.
 	FullTimestamp bool
 
-	// TimestampFormat to use for display when a full timestamp is printed
+	// TimestampFormat to use for display when a full timestamp is printed.
+	// The format to use is the same than for time.Format or time.Parse from the standard
+	// library.
+	// The standard Library already provides a set of predefined format.
 	TimestampFormat string
 
 	// The fields are sorted by default for a consistent output. For applications
@@ -107,11 +118,10 @@ func (f *TextFormatter) isColored() bool {
 	isColored := f.ForceColors || (f.isTerminal && (runtime.GOOS != "windows"))
 
 	if f.EnvironmentOverrideColors {
-		if force, ok := os.LookupEnv("CLICOLOR_FORCE"); ok && force != "0" {
+		switch force, ok := os.LookupEnv("CLICOLOR_FORCE"); {
+		case ok && force != "0":
 			isColored = true
-		} else if ok && force == "0" {
-			isColored = false
-		} else if os.Getenv("CLICOLOR") == "0" {
+		case ok && force == "0", os.Getenv("CLICOLOR") == "0":
 			isColored = false
 		}
 	}
@@ -228,6 +238,8 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *Entry, keys []strin
 		levelColor = yellow
 	case ErrorLevel, FatalLevel, PanicLevel:
 		levelColor = red
+	case InfoLevel:
+		levelColor = blue
 	default:
 		levelColor = blue
 	}
@@ -268,11 +280,12 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *Entry, keys []strin
 		}
 	}
 
-	if f.DisableTimestamp {
+	switch {
+	case f.DisableTimestamp:
 		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m%s %-44s ", levelColor, levelText, caller, entry.Message)
-	} else if !f.FullTimestamp {
+	case !f.FullTimestamp:
 		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%04d]%s %-44s ", levelColor, levelText, int(entry.Time.Sub(baseTimestamp)/time.Second), caller, entry.Message)
-	} else {
+	default:
 		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%s]%s %-44s ", levelColor, levelText, entry.Time.Format(timestampFormat), caller, entry.Message)
 	}
 	for _, k := range keys {
@@ -283,8 +296,14 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *Entry, keys []strin
 }
 
 func (f *TextFormatter) needsQuoting(text string) bool {
+	if f.ForceQuote {
+		return true
+	}
 	if f.QuoteEmptyFields && len(text) == 0 {
 		return true
+	}
+	if f.DisableQuote {
+		return false
 	}
 	for _, ch := range text {
 		if !((ch >= 'a' && ch <= 'z') ||
