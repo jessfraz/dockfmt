@@ -3,9 +3,8 @@ package instructions
 import (
 	"strings"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/strslice"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
+	dockerspec "github.com/moby/docker-image-spec/specs-go/v1"
 	"github.com/pkg/errors"
 )
 
@@ -14,8 +13,9 @@ import (
 // This is useful for commands containing key-value maps that want to preserve
 // the order of insertion, instead of map[string]string which does not.
 type KeyValuePair struct {
-	Key   string
-	Value string
+	Key     string
+	Value   string
+	NoDelim bool
 }
 
 func (kvp *KeyValuePair) String() string {
@@ -24,9 +24,9 @@ func (kvp *KeyValuePair) String() string {
 
 // KeyValuePairOptional is identical to KeyValuePair, but allows for optional values.
 type KeyValuePairOptional struct {
-	Key     string
-	Value   *string
-	Comment string
+	Key        string
+	Value      *string
+	DocComment string
 }
 
 func (kvpo *KeyValuePairOptional) String() string {
@@ -49,6 +49,7 @@ func (kvpo *KeyValuePairOptional) ValueString() string {
 type Command interface {
 	Name() string
 	Location() []parser.Range
+	Comments() []string
 }
 
 // KeyValuePairs is a slice of KeyValuePair
@@ -59,6 +60,7 @@ type withNameAndCode struct {
 	code     string
 	name     string
 	location []parser.Range
+	comments []string
 }
 
 func (c *withNameAndCode) String() string {
@@ -75,8 +77,17 @@ func (c *withNameAndCode) Location() []parser.Range {
 	return c.location
 }
 
+func (c *withNameAndCode) Comments() []string {
+	return c.comments
+}
+
 func newWithNameAndCode(req parseRequest) withNameAndCode {
-	return withNameAndCode{code: strings.TrimSpace(req.original), name: req.command, location: req.location}
+	return withNameAndCode{
+		code:     strings.TrimSpace(req.original),
+		name:     req.command,
+		location: req.location,
+		comments: req.comments,
+	}
 }
 
 // SingleWordExpander is a provider for variable expansion where a single word
@@ -109,8 +120,9 @@ func expandKvp(kvp KeyValuePair, expander SingleWordExpander) (KeyValuePair, err
 	if err != nil {
 		return KeyValuePair{}, err
 	}
-	return KeyValuePair{Key: key, Value: value}, nil
+	return KeyValuePair{Key: key, Value: value, NoDelim: kvp.NoDelim}, nil
 }
+
 func expandKvpsInPlace(kvps KeyValuePairs, expander SingleWordExpander) error {
 	for i, kvp := range kvps {
 		newKvp, err := expandKvp(kvp, expander)
@@ -155,7 +167,7 @@ type MaintainerCommand struct {
 }
 
 // NewLabelCommand creates a new 'LABEL' command
-func NewLabelCommand(k string, v string, NoExp bool) *LabelCommand {
+func NewLabelCommand(k string, v string, noExp bool) *LabelCommand {
 	kvp := KeyValuePair{Key: k, Value: v}
 	c := "LABEL "
 	c += kvp.String()
@@ -165,7 +177,7 @@ func NewLabelCommand(k string, v string, NoExp bool) *LabelCommand {
 		Labels: KeyValuePairs{
 			kvp,
 		},
-		noExpand: NoExp,
+		noExpand: noExp,
 	}
 	return cmd
 }
@@ -239,11 +251,13 @@ func (s *SourcesAndDest) ExpandRaw(expander SingleWordExpander) error {
 type AddCommand struct {
 	withNameAndCode
 	SourcesAndDest
-	Chown      string
-	Chmod      string
-	Link       bool
-	KeepGitDir bool // whether to keep .git dir, only meaningful for git sources
-	Checksum   string
+	Chown           string
+	Chmod           string
+	Link            bool
+	ExcludePatterns []string
+	KeepGitDir      *bool // whether to keep .git dir, only meaningful for git sources
+	Checksum        string
+	Unpack          *bool
 }
 
 func (c *AddCommand) Expand(expander SingleWordExpander) error {
@@ -252,6 +266,12 @@ func (c *AddCommand) Expand(expander SingleWordExpander) error {
 		return err
 	}
 	c.Chown = expandedChown
+
+	expandedChmod, err := expander(c.Chmod)
+	if err != nil {
+		return err
+	}
+	c.Chmod = expandedChmod
 
 	expandedChecksum, err := expander(c.Checksum)
 	if err != nil {
@@ -270,10 +290,12 @@ func (c *AddCommand) Expand(expander SingleWordExpander) error {
 type CopyCommand struct {
 	withNameAndCode
 	SourcesAndDest
-	From  string
-	Chown string
-	Chmod string
-	Link  bool
+	From            string
+	Chown           string
+	Chmod           string
+	Link            bool
+	ExcludePatterns []string
+	Parents         bool // parents preserves directory structure
 }
 
 func (c *CopyCommand) Expand(expander SingleWordExpander) error {
@@ -282,6 +304,12 @@ func (c *CopyCommand) Expand(expander SingleWordExpander) error {
 		return err
 	}
 	c.Chown = expandedChown
+
+	expandedChmod, err := expander(c.Chmod)
+	if err != nil {
+		return err
+	}
+	c.Chmod = expandedChmod
 
 	return c.SourcesAndDest.Expand(expander)
 }
@@ -322,7 +350,7 @@ type ShellInlineFile struct {
 
 // ShellDependantCmdLine represents a cmdline optionally prepended with the shell
 type ShellDependantCmdLine struct {
-	CmdLine      strslice.StrSlice
+	CmdLine      []string
 	Files        []ShellInlineFile
 	PrependShell bool
 }
@@ -365,7 +393,7 @@ type CmdCommand struct {
 //	HEALTHCHECK <health-config>
 type HealthCheckCommand struct {
 	withNameAndCode
-	Health *container.HealthConfig
+	Health *dockerspec.HealthcheckConfig
 }
 
 // EntrypointCommand sets the default entrypoint of the container to use the
@@ -476,7 +504,7 @@ func (c *ArgCommand) Expand(expander SingleWordExpander) error {
 //	SHELL bash -e -c
 type ShellCommand struct {
 	withNameAndCode
-	Shell strslice.StrSlice
+	Shell []string
 }
 
 // Stage represents a bundled collection of commands.
@@ -490,13 +518,15 @@ type ShellCommand struct {
 type Stage struct {
 	Name     string    // name of the stage
 	Commands []Command // commands contained within the stage
+	OrigCmd  string    // original FROM command, used for rule checks
 	BaseName string    // name of the base stage or source
 	Platform string    // platform of base source to use
 
-	Comment string // doc-comment directly above the stage
+	DocComment string // doc-comment directly above the stage
 
 	SourceCode string         // contents of the defining FROM command
 	Location   []parser.Range // location of the defining FROM command
+	Comments   []string
 }
 
 // AddCommand appends a command to the stage.
@@ -534,16 +564,16 @@ func HasStage(s []Stage, name string) (int, bool) {
 }
 
 type withExternalData struct {
-	m map[interface{}]interface{}
+	m map[any]any
 }
 
-func (c *withExternalData) getExternalValue(k interface{}) interface{} {
+func (c *withExternalData) getExternalValue(k any) any {
 	return c.m[k]
 }
 
-func (c *withExternalData) setExternalValue(k, v interface{}) {
+func (c *withExternalData) setExternalValue(k, v any) {
 	if c.m == nil {
-		c.m = map[interface{}]interface{}{}
+		c.m = map[any]any{}
 	}
 	c.m[k] = v
 }
