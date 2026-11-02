@@ -154,8 +154,15 @@ func (df *file) doFmt(ast *parser.Node) (result string, err error) {
 		}
 	case "RUN":
 		v = fmtRun(v)
-	case "LABEL":
-		v = fmtLabel(ast.Next)
+	case "ENV", "LABEL":
+		legacySeparator := "\t"
+		if k == "LABEL" {
+			legacySeparator = "="
+		}
+		v, err = fmtKeyValues(ast.Next, legacySeparator)
+		if err != nil {
+			return "", err
+		}
 	default:
 		v = fmtCopy(ast.Next)
 	}
@@ -224,10 +231,26 @@ func fmtCopy(node *parser.Node) string {
 	return strings.Join(cmd, "\t")
 }
 
-func fmtLabel(node *parser.Node) string {
-	cmd := []string{}
-	cmd = getCmd(node, cmd)
-	return strings.Join(cmd, "=")
+func fmtKeyValues(node *parser.Node, legacySeparator string) (string, error) {
+	var pairs []string
+	// BuildKit stores key/value instructions as key, value, separator triples.
+	// An empty separator denotes the legacy space-separated syntax.
+	for node != nil {
+		if node.Next == nil || node.Next.Next == nil {
+			return "", fmt.Errorf("missing value or separator for %q", node.Value)
+		}
+		value := node.Next
+		separator := value.Next
+		delimiter := separator.Value
+		if delimiter == "" {
+			delimiter = legacySeparator
+		} else if delimiter != "=" {
+			return "", fmt.Errorf("unexpected key/value separator %q", delimiter)
+		}
+		pairs = append(pairs, node.Value+delimiter+value.Value)
+		node = separator.Next
+	}
+	return strings.Join(pairs, "\t"), nil
 }
 
 func fmtRun(s string) string {
